@@ -10,7 +10,7 @@ SRCS = $(wildcard $(SRC_DIR)/*.c)
 OBJS = $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRCS))
 MAIN_OBJ = main.o
 
-TARGET = program
+TARGET = program.out
 
 all: $(TARGET)
 

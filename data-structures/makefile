@@ -9,7 +9,7 @@ SRCS = $(wildcard $(SRC_DIR)/*.c)
 OBJS = $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRCS)) 
 LIB_OBJS = $(filter-out $(OBJ_DIR)/main.o, $(OBJS))          
 
-TARGET = program
+TARGET = program.out
 
 all: $(TARGET)
 
