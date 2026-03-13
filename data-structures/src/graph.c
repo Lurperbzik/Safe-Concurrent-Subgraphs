@@ -1,0 +1,56 @@
+#include "graph.h"
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+/*
+ * La matriz de adyacencia en este caso tiene un formato específico
+ * que consta de una matriz boolena de aristas y un vector de pesos
+ * El grafo resultante es una lista adyacente de memoria que almacena
+ * los nodos
+ * Los punteros de entrada y salida de los nodos también se almacenan en
+ * una lista adyacente en memoria
+ */
+
+Graph create_from_adj_matrix(AdjMatrix matrix) {
+    Graph nodes = calloc(matrix.dim, sizeof(Node));
+    if (nodes == NULL)
+        return NULL;
+
+    size_t n_edges = 0;
+    int mult_outs;
+    for (int i = 0; i < matrix.dim; i++) {
+        mult_outs = 0;
+        for (int j = 0; j < matrix.dim; j++) {
+            if (matrix.edges[i * matrix.dim + j] != 0) {
+                n_edges++;
+                mult_outs++;
+            }
+        }
+        if (mult_outs > 1)
+            nodes[i].has_mult_outs = true;
+    }
+    Node **edges = malloc(n_edges * sizeof(Node *));
+    if (edges == NULL) {
+        free(nodes);
+        return NULL;
+    }
+    for (int i = 0; i < matrix.dim; i++) {
+        nodes[i].id = i;
+        nodes[i].weight = matrix.nodes_weights[i];
+    }
+    size_t index = 0;
+    for (int i = 0; i < matrix.dim; i++) {
+        for (int j = 0; j < matrix.dim; j++) {
+            if (matrix.edges[j * matrix.dim + i] != 0) {
+                edges[index] = &nodes[j];
+                if (nodes[i].in_degree == 0) {
+                    nodes[i].inputs = &edges[index];
+                }
+                nodes[i].in_degree++;
+                index++;
+            }
+        }
+    }
+    return nodes;
+}
