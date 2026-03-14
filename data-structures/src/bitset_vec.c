@@ -1,12 +1,12 @@
 #include "bitset_vec.h"
 #include <stdlib.h>
 
-BitSetVector *bitset_vec_new(void) {
-    BitSetVector *vector = malloc(sizeof(BitSetVector));
+bitset_vec_t *bitset_vec_new(void) {
+    bitset_vec_t *vector = malloc(sizeof(bitset_vec_t));
     if (vector == NULL)
         return NULL;
 
-    BitSet **bitsets = calloc(INITIAL_CAPACITY, sizeof(BitSet *));
+    bitset_t **bitsets = calloc(INITIAL_CAPACITY, sizeof(bitset_t *));
     if (bitsets == NULL) {
         free(vector);
         return NULL;
@@ -18,10 +18,11 @@ BitSetVector *bitset_vec_new(void) {
     return vector;
 }
 
-int bitset_vec_push(BitSetVector *vect, BitSet *bitset) {
+int bitset_vec_push(bitset_vec_t *vect, bitset_t *bitset) {
     if (vect->size == vect->capacity) {
         size_t new_capacity = vect->capacity * 2;
-        BitSet **new = realloc(vect->bitsets, new_capacity * sizeof(BitSet *));
+        bitset_t **new =
+            realloc(vect->bitsets, new_capacity * sizeof(bitset_t *));
         if (new == NULL)
             return -1;
         vect->bitsets = new;
@@ -31,6 +32,6 @@ int bitset_vec_push(BitSetVector *vect, BitSet *bitset) {
     return 0;
 }
 
-void bitset_vec_pop(BitSetVector *vect) {
+void bitset_vec_pop(bitset_vec_t *vect) {
     bitset_free(&vect->bitsets[--vect->size]);
 }

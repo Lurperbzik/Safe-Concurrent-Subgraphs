@@ -6,12 +6,12 @@
 #define INITIAL_CAPACITY 4
 
 typedef struct {
-    BitSet **bitsets;
+    bitset_t **bitsets;
     size_t size;
     size_t capacity;
-} BitSetVector;
+} bitset_vec_t;
 
-BitSetVector *bitset_vec_new(void);
-int bitset_vec_push(BitSetVector *vect, BitSet *bitset);
-void bitset_vec_pop(BitSetVector *vect);
+bitset_vec_t *bitset_vec_new(void);
+int bitset_vec_push(bitset_vec_t *vect, bitset_t *bitset);
+void bitset_vec_pop(bitset_vec_t *vect);
 #endif

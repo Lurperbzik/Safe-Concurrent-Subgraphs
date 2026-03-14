@@ -11,9 +11,9 @@
  * una lista adyacente en memoria
  */
 
-Graph create_from_adj_matrix(AdjMatrix matrix) {
-    Graph graph = {0};
-    graph.nodes = calloc(matrix.dim, sizeof(Node));
+graph_t create_from_adj_matrix(adj_matrix_t matrix) {
+    graph_t graph = {0};
+    graph.nodes = calloc(matrix.dim, sizeof(node_t));
     if (graph.nodes == NULL)
         return graph;
 
@@ -30,7 +30,7 @@ Graph create_from_adj_matrix(AdjMatrix matrix) {
         if (mult_outs > 1)
             graph.nodes[i].has_mult_outs = true;
     }
-    Node **edges = malloc(n_edges * sizeof(Node *));
+    node_t **edges = malloc(n_edges * sizeof(node_t *));
     if (edges == NULL) {
         free(graph.nodes);
         graph.nodes = NULL;

@@ -8,20 +8,20 @@ typedef struct {
     unsigned int dim;
     int *nodes_weights;
     bool *edges;
-} AdjMatrix;
+} adj_matrix_t;
 
-typedef struct Node {
+typedef struct node_t {
     unsigned int id;
     unsigned int weight;
     int in_degree;
-    struct Node **inputs;
+    struct node_t **inputs;
     bool has_mult_outs;
-} Node;
+} node_t;
 
 typedef struct {
-    Node *nodes;
+    node_t *nodes;
     size_t size;
-} Graph;
+} graph_t;
 
-Graph create_from_adj_matrix(AdjMatrix matrix);
+graph_t create_from_adj_matrix(adj_matrix_t matrix);
 #endif

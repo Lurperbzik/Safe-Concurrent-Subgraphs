@@ -6,9 +6,9 @@
 #define DIM 12
 #define LIMIT 5
 
-void print_path(Node *base, Node *node, bool init);
-int safe_concurrent_subgraphs(Graph graph, BitSetVector *vect);
-int get_subgraph(BitSet *bset, Node *node, BitSetVector *vect,
+void print_path(node_t *base, node_t *node, bool init);
+int safe_concurrent_subgraphs(graph_t graph, bitset_vec_t *vect);
+int get_subgraph(bitset_t *bset, node_t node, bitset_vec_t *vect,
                  size_t universe_length);
 
 int main(void) {
@@ -29,15 +29,15 @@ int main(void) {
     };
     // clang-format on
     int nodes_weights[DIM] = {1, 1, 1, 1, 1, 3, 2, 3, 6, 2, 1, 4};
-    AdjMatrix adj = {
+    adj_matrix_t adj = {
         .dim = DIM, .edges = edges, .nodes_weights = nodes_weights};
 
-    Graph graph = create_from_adj_matrix(adj);
+    graph_t graph = create_from_adj_matrix(adj);
     if (graph.nodes == NULL) {
         printf("Error creating graph\n");
         return 1;
     }
-    BitSetVector *vector = bitset_vec_new();
+    bitset_vec_t *vector = bitset_vec_new();
     if (vector == NULL) {
         printf("Error creating bitset vector\n");
         return 2;
@@ -50,8 +50,8 @@ int main(void) {
     return 0;
 }
 
-int safe_concurrent_subgraphs(Graph graph, BitSetVector *vect) {
-    BitSet *bset;
+int safe_concurrent_subgraphs(graph_t graph, bitset_vec_t *vect) {
+    bitset_t *bset;
     for (size_t i = 0; i < graph.size; i++) {
         bset = bitset_new(graph.size);
         if (bset == NULL)
@@ -60,16 +60,16 @@ int safe_concurrent_subgraphs(Graph graph, BitSetVector *vect) {
         if (bitset_vec_push(vect, bset) != 0)
             return -1;
 
-        if (get_subgraph(bset, &graph.nodes[i], vect, graph.size) != 0)
+        if (get_subgraph(bset, graph.nodes[i], vect, graph.size) != 0)
             return -1;
     }
     return 0;
 }
 
-int get_subgraph(BitSet *bset, Node *node, BitSetVector *vect,
+int get_subgraph(bitset_t *bset, node_t node, bitset_vec_t *vect,
                  size_t universe_length) {
-    BitSet *new;
-    int status = bitset_insert(bset, *node, LIMIT);
+    bitset_t *new;
+    int status = bitset_insert(bset, node, LIMIT);
     if (status == MAX_LIMIT_REACHED) {
         return 0;
     }
@@ -77,10 +77,10 @@ int get_subgraph(BitSet *bset, Node *node, BitSetVector *vect,
         bitset_vec_pop(vect);
         return 0;
     }
-    if (get_subgraph(bset, node->inputs[0], vect, universe_length) != 0)
+    if (get_subgraph(bset, *node.inputs[0], vect, universe_length) != 0)
         return -1;
 
-    for (int i = 1; i < node->in_degree; i++) {
+    for (int i = 1; i < node.in_degree; i++) {
         new = bitset_new_from(universe_length, *bset);
         // Error with memory
         if (new == NULL)
@@ -89,13 +89,13 @@ int get_subgraph(BitSet *bset, Node *node, BitSetVector *vect,
         if (bitset_vec_push(vect, new) != 0)
             return -1;
 
-        if (get_subgraph(new, node->inputs[i], vect, universe_length) != 0)
+        if (get_subgraph(new, *node.inputs[i], vect, universe_length) != 0)
             return -1;
     }
     return 0;
 }
 
-void print_path(Node *base, Node *node, bool init) {
+void print_path(node_t *base, node_t *node, bool init) {
     if (node == base && !init) {
         printf("\n");
         return;

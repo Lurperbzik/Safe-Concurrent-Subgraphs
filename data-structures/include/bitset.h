@@ -12,12 +12,12 @@ typedef struct {
     uint64_t *nodes;
     size_t n_blocks;
     unsigned int weight_sum;
-} BitSet;
+} bitset_t;
 
-BitSet *bitset_new(size_t universe_length);
-BitSet *bitset_new_from(size_t universe_length, BitSet src);
-int bitset_insert(BitSet *set, Node node, unsigned int limit);
-bool bitsets_are_disjoint(BitSet s1, BitSet s2);
-void bitset_free(BitSet **set);
+bitset_t *bitset_new(size_t universe_length);
+bitset_t *bitset_new_from(size_t universe_length, bitset_t src);
+int bitset_insert(bitset_t *set, node_t node, unsigned int limit);
+bool bitsets_are_disjoint(bitset_t s1, bitset_t s2);
+void bitset_free(bitset_t **set);
 
 #endif
