@@ -2,15 +2,15 @@
 #include <stddef.h>
 #include <stdio.h>
 
-void print_path(Graph graph, Node *node, bool init) {
-    if (node == graph && !init) {
+void print_path(Node *base, Node *node, bool init) {
+    if (node == base && !init) {
         printf("\n");
         return;
     }
 
     for (int i = 0; i < node->in_degree; i++) {
         printf("%d\t", node->id);
-        print_path(graph, node->inputs[i], false);
+        print_path(base, node->inputs[i], false);
     }
 }
 
@@ -38,20 +38,20 @@ int main(void) {
         .dim = DIM, .edges = edges, .nodes_weights = nodes_weights};
 
     Graph graph = create_from_adj_matrix(adj);
-    if (graph == NULL) {
+    if (graph.nodes == NULL) {
         return 1;
     }
     for (int i = 0; i < DIM; i++) {
         printf("\nNode %d :", i);
         printf("\t{");
-        printf("\tid: %d", graph[i].id);
-        printf("\tweight: %d", graph[i].weight);
-        printf("\tin_degree: %d", graph[i].in_degree);
-        printf("\thas_mult_outs: %d", graph[i].has_mult_outs);
+        printf("\tid: %d", graph.nodes[i].id);
+        printf("\tweight: %d", graph.nodes[i].weight);
+        printf("\tin_degree: %d", graph.nodes[i].in_degree);
+        printf("\thas_mult_outs: %d", graph.nodes[i].has_mult_outs);
         printf("\t}");
     }
     printf("\n\nPATH Node A: \n");
-    Node *a = graph;
-    print_path(graph, a, true);
+    Node *a = graph.nodes;
+    print_path(graph.nodes, a, true);
     return 0;
 }
