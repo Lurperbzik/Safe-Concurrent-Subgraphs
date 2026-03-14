@@ -15,9 +15,9 @@ typedef struct {
 } bitset_t;
 
 bitset_t *bitset_new(size_t universe_length);
-bitset_t *bitset_new_from(size_t universe_length, bitset_t src);
-int bitset_insert(bitset_t *set, node_t node, unsigned int limit);
-bool bitsets_are_disjoint(bitset_t s1, bitset_t s2);
+bitset_t *bitset_new_from(size_t universe_length, bitset_t *src);
+int bitset_insert(bitset_t *set, node_t *node, unsigned int limit);
+bool bitsets_are_disjoint(bitset_t *s1, bitset_t *s2);
 void bitset_free(bitset_t **set);
 
 #endif

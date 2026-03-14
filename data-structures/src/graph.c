@@ -11,18 +11,18 @@
  * una lista adyacente en memoria
  */
 
-graph_t create_from_adj_matrix(adj_matrix_t matrix) {
+graph_t create_from_adj_matrix(adj_matrix_t *matrix) {
     graph_t graph = {0};
-    graph.nodes = calloc(matrix.dim, sizeof(node_t));
+    graph.nodes = calloc(matrix->dim, sizeof(node_t));
     if (graph.nodes == NULL)
         return graph;
 
     size_t n_edges = 0;
     int mult_outs;
-    for (unsigned int i = 0; i < matrix.dim; i++) {
+    for (unsigned int i = 0; i < matrix->dim; i++) {
         mult_outs = 0;
-        for (unsigned int j = 0; j < matrix.dim; j++) {
-            if (matrix.edges[i * matrix.dim + j] != 0) {
+        for (unsigned int j = 0; j < matrix->dim; j++) {
+            if (matrix->edges[i * matrix->dim + j] != 0) {
                 n_edges++;
                 mult_outs++;
             }
@@ -36,14 +36,14 @@ graph_t create_from_adj_matrix(adj_matrix_t matrix) {
         graph.nodes = NULL;
         return graph;
     }
-    for (unsigned int i = 0; i < matrix.dim; i++) {
+    for (unsigned int i = 0; i < matrix->dim; i++) {
         graph.nodes[i].id = i;
-        graph.nodes[i].weight = matrix.nodes_weights[i];
+        graph.nodes[i].weight = matrix->nodes_weights[i];
     }
     size_t index = 0;
-    for (unsigned int i = 0; i < matrix.dim; i++) {
-        for (unsigned int j = 0; j < matrix.dim; j++) {
-            if (matrix.edges[j * matrix.dim + i] != 0) {
+    for (unsigned int i = 0; i < matrix->dim; i++) {
+        for (unsigned int j = 0; j < matrix->dim; j++) {
+            if (matrix->edges[j * matrix->dim + i] != 0) {
                 edges[index] = &graph.nodes[j];
                 if (graph.nodes[i].in_degree == 0) {
                     graph.nodes[i].inputs = &edges[index];
@@ -53,6 +53,6 @@ graph_t create_from_adj_matrix(adj_matrix_t matrix) {
             }
         }
     }
-    graph.size = matrix.dim;
+    graph.size = matrix->dim;
     return graph;
 }

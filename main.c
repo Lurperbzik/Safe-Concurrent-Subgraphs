@@ -8,7 +8,7 @@
 
 void print_path(node_t *base, node_t *node, bool init);
 int safe_concurrent_subgraphs(graph_t graph, bitset_vec_t *vect);
-int get_subgraph(bitset_t *bset, node_t node, bitset_vec_t *vect,
+int get_subgraph(bitset_t *bset, node_t *node, bitset_vec_t *vect,
                  size_t universe_length);
 
 int main(void) {
@@ -32,7 +32,7 @@ int main(void) {
     adj_matrix_t adj = {
         .dim = DIM, .edges = edges, .nodes_weights = nodes_weights};
 
-    graph_t graph = create_from_adj_matrix(adj);
+    graph_t graph = create_from_adj_matrix(&adj);
     if (graph.nodes == NULL) {
         printf("Error creating graph\n");
         return 1;
@@ -60,13 +60,13 @@ int safe_concurrent_subgraphs(graph_t graph, bitset_vec_t *vect) {
         if (bitset_vec_push(vect, bset) != 0)
             return -1;
 
-        if (get_subgraph(bset, graph.nodes[i], vect, graph.size) != 0)
+        if (get_subgraph(bset, &graph.nodes[i], vect, graph.size) != 0)
             return -1;
     }
     return 0;
 }
 
-int get_subgraph(bitset_t *bset, node_t node, bitset_vec_t *vect,
+int get_subgraph(bitset_t *bset, node_t *node, bitset_vec_t *vect,
                  size_t universe_length) {
     bitset_t *new;
     int status = bitset_insert(bset, node, LIMIT);
@@ -77,11 +77,11 @@ int get_subgraph(bitset_t *bset, node_t node, bitset_vec_t *vect,
         bitset_vec_pop(vect);
         return 0;
     }
-    if (get_subgraph(bset, *node.inputs[0], vect, universe_length) != 0)
+    if (get_subgraph(bset, node->inputs[0], vect, universe_length) != 0)
         return -1;
 
-    for (int i = 1; i < node.in_degree; i++) {
-        new = bitset_new_from(universe_length, *bset);
+    for (int i = 1; i < node->in_degree; i++) {
+        new = bitset_new_from(universe_length, bset);
         // Error with memory
         if (new == NULL)
             return -1;
@@ -89,7 +89,7 @@ int get_subgraph(bitset_t *bset, node_t node, bitset_vec_t *vect,
         if (bitset_vec_push(vect, new) != 0)
             return -1;
 
-        if (get_subgraph(new, *node.inputs[i], vect, universe_length) != 0)
+        if (get_subgraph(new, node->inputs[i], vect, universe_length) != 0)
             return -1;
     }
     return 0;

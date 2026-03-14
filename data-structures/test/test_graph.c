@@ -37,7 +37,7 @@ int main(void) {
     adj_matrix_t adj = {
         .dim = DIM, .edges = edges, .nodes_weights = nodes_weights};
 
-    graph_t graph = create_from_adj_matrix(adj);
+    graph_t graph = create_from_adj_matrix(&adj);
     if (graph.nodes == NULL) {
         return 1;
     }

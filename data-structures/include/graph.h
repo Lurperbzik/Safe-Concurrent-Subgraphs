@@ -23,5 +23,5 @@ typedef struct {
     size_t size;
 } graph_t;
 
-graph_t create_from_adj_matrix(adj_matrix_t matrix);
+graph_t create_from_adj_matrix(adj_matrix_t *matrix);
 #endif
