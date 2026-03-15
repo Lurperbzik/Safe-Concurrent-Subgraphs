@@ -29,6 +29,7 @@ bitset_t *bitset_new_from(size_t universe_length, bitset_t *src) {
     if (new == NULL)
         return NULL;
     memcpy(new->nodes, src->nodes, BLOCK_SIZE * src->n_blocks);
+    new->weight_sum = src->weight_sum;
     return new;
 }
 
@@ -42,9 +43,8 @@ int bitset_insert(bitset_t *set, node_t *node, unsigned int limit) {
     set->weight_sum += node->weight;
 
     if (node->has_mult_outs) {
-        if (set->weight_sum >= limit) {
+        if (set->weight_sum >= limit)
             return MAX_LIMIT_REACHED;
-        }
         if (set->weight_sum != node->weight)
             return NON_PRIMITIVE_SET;
     }
@@ -66,4 +66,10 @@ void bitset_free(bitset_t **set) {
     (*set)->nodes = NULL;
     free(*set);
     *set = NULL;
+}
+
+void bitsets_disjoint_union(bitset_t *dest, bitset_t *src) {
+    for (size_t i = 0; i < dest->n_blocks; i++) {
+        dest->nodes[i] |= src->nodes[i];
+    }
 }

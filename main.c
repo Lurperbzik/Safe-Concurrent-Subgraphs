@@ -6,10 +6,20 @@
 #define DIM 12
 #define LIMIT 5
 
-void print_path(node_t *base, node_t *node, bool init);
 int safe_concurrent_subgraphs(graph_t graph, bitset_vec_t *vect);
-int get_subgraph(bitset_t *bset, node_t *node, bitset_vec_t *vect,
-                 size_t universe_length);
+int exhaustive_search_sets(graph_t graph, bitset_vec_t *vect);
+int deep_search_paths(bitset_t *bset, node_t *node, bitset_vec_t *vect,
+                      size_t universe_length);
+
+bitset_vec_t *max_disjoint_sets(bitset_vec_t *vect, size_t universe_length);
+void backtrack(bitset_vec_t *vect, size_t index, bitset_t *current_union,
+               bitset_vec_t *selected, bitset_vec_t *best,
+               size_t universe_length);
+
+void print_binary(uint64_t n) {
+    for (int i = sizeof(n) * 8 - 1; i >= 0; i--)
+        printf("%ld", (n >> i) & 1);
+}
 
 int main(void) {
     // clang-format off
@@ -42,15 +52,26 @@ int main(void) {
         printf("Error creating bitset vector\n");
         return 2;
     }
-    if (safe_concurrent_subgraphs(graph, vector) != 0) {
+    if (exhaustive_search_sets(graph, vector) != 0) {
         printf("Error obteniendo subgrafos");
     } else {
         printf("Número de subgrafos obtenidos: %ld\n", vector->size);
     }
+    bitset_vec_t *solution = max_disjoint_sets(vector, graph.size);
+
+    printf("Tamaño de la solución máxima: %ld\n", solution->size);
+    for (size_t i = 0; i < solution->size; i++) {
+        printf("Set : ");
+        for (size_t j = 0; j < solution->bitsets[0]->n_blocks; j++) {
+            print_binary(solution->bitsets[i]->nodes[j]);
+            printf(" ");
+        }
+        printf("\n");
+    }
     return 0;
 }
 
-int safe_concurrent_subgraphs(graph_t graph, bitset_vec_t *vect) {
+int exhaustive_search_sets(graph_t graph, bitset_vec_t *vect) {
     bitset_t *bset;
     for (size_t i = 0; i < graph.size; i++) {
         bset = bitset_new(graph.size);
@@ -60,49 +81,76 @@ int safe_concurrent_subgraphs(graph_t graph, bitset_vec_t *vect) {
         if (bitset_vec_push(vect, bset) != 0)
             return -1;
 
-        if (get_subgraph(bset, &graph.nodes[i], vect, graph.size) != 0)
+        if (deep_search_paths(bset, &graph.nodes[i], vect, graph.size) != 0)
             return -1;
     }
     return 0;
 }
 
-int get_subgraph(bitset_t *bset, node_t *node, bitset_vec_t *vect,
-                 size_t universe_length) {
+int deep_search_paths(bitset_t *bset, node_t *node, bitset_vec_t *vect,
+                      size_t universe_length) {
     bitset_t *new;
     int status = bitset_insert(bset, node, LIMIT);
     if (status == MAX_LIMIT_REACHED) {
         return 0;
     }
     if (status == NON_PRIMITIVE_SET) {
-        bitset_vec_pop(vect);
+        new = bitset_vec_pop(vect);
+        bitset_free(&new);
         return 0;
     }
-    if (get_subgraph(bset, node->inputs[0], vect, universe_length) != 0)
+    if (deep_search_paths(bset, node->inputs[0], vect, universe_length) != 0)
         return -1;
 
     for (int i = 1; i < node->in_degree; i++) {
         new = bitset_new_from(universe_length, bset);
-        // Error with memory
         if (new == NULL)
             return -1;
-        // Error with memory
         if (bitset_vec_push(vect, new) != 0)
             return -1;
 
-        if (get_subgraph(new, node->inputs[i], vect, universe_length) != 0)
+        if (deep_search_paths(new, node->inputs[i], vect, universe_length) != 0)
             return -1;
     }
     return 0;
 }
 
-void print_path(node_t *base, node_t *node, bool init) {
-    if (node == base && !init) {
-        printf("\n");
+bitset_vec_t *max_disjoint_sets(bitset_vec_t *vect, size_t universe_length) {
+    size_t index = 0;
+    bitset_t *current_union = bitset_new(universe_length);
+    bitset_vec_t *selected = bitset_vec_new();
+    bitset_vec_t *best = bitset_vec_new();
+    backtrack(vect, index, current_union, selected, best, universe_length);
+    return best;
+}
+
+void backtrack(bitset_vec_t *vect, size_t index, bitset_t *current_union,
+               bitset_vec_t *selected, bitset_vec_t *best,
+               size_t universe_length) {
+
+    if (selected->size + vect->size - index <= best->size)
+        return;
+
+    if (index >= vect->size) {
+        if (selected->size > best->size) {
+            bitset_vec_free(&best);
+            bitset_vec_copy(&best, selected);
+        }
         return;
     }
 
-    for (int i = 0; i < node->in_degree; i++) {
-        printf("%d\t", node->id);
-        print_path(base, node->inputs[i], false);
+    // Branch 1
+    if (bitsets_are_disjoint(vect->bitsets[index], current_union)) {
+        bitset_vec_t *new_selected;
+        bitset_vec_copy(&new_selected, selected);
+        bitset_vec_push(new_selected, vect->bitsets[index]);
+        bitset_t *new_union = bitset_new_from(universe_length, current_union);
+        bitsets_disjoint_union(new_union, vect->bitsets[index]);
+        backtrack(vect, index + 1, new_union, new_selected, best,
+                  universe_length);
+        bitset_vec_free(&new_selected);
+        bitset_free(&new_union);
     }
+    // Branch 2
+    backtrack(vect, index + 1, current_union, selected, best, universe_length);
 }

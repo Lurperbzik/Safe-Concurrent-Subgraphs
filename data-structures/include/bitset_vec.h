@@ -13,5 +13,7 @@ typedef struct {
 
 bitset_vec_t *bitset_vec_new(void);
 int bitset_vec_push(bitset_vec_t *vect, bitset_t *bitset);
-void bitset_vec_pop(bitset_vec_t *vect);
+void bitset_vec_free(bitset_vec_t **set);
+bitset_t *bitset_vec_pop(bitset_vec_t *vect);
+int bitset_vec_copy(bitset_vec_t **dest, bitset_vec_t *src);
 #endif
