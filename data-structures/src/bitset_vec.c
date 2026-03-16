@@ -61,3 +61,11 @@ int bitset_vec_copy(bitset_vec_t **dest, bitset_vec_t *src) {
     memcpy((*dest)->bitsets, src->bitsets, src->size * sizeof(bitset_t *));
     return 0;
 }
+
+int bitset_vec_get_index(bitset_vec_t *vect, size_t index) {
+    for (size_t i = 0; i < vect->size; i++) {
+        if (bitset_contains(vect->bitsets[i], index))
+            return i;
+    }
+    return -1;
+}

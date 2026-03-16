@@ -16,4 +16,5 @@ int bitset_vec_push(bitset_vec_t *vect, bitset_t *bitset);
 void bitset_vec_free(bitset_vec_t **set);
 bitset_t *bitset_vec_pop(bitset_vec_t *vect);
 int bitset_vec_copy(bitset_vec_t **dest, bitset_vec_t *src);
+int bitset_vec_get_index(bitset_vec_t *vect, size_t index);
 #endif
