@@ -40,7 +40,7 @@ bitset_t *bitset_vec_pop(bitset_vec_t *vect) {
 void bitset_vec_free(bitset_vec_t **vect) {
     if (vect == NULL || *vect == NULL)
         return;
-    free((*vect)->bitsets); // libera el array interno
+    free((*vect)->bitsets);
     free(*vect);
     *vect = NULL;
 }

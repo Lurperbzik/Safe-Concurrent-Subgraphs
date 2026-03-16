@@ -21,6 +21,7 @@ bitset_t *bitset_new(size_t universe_length) {
     new->n_blocks = n_blocks;
     new->nodes = blocks;
     new->weight_sum = 0;
+    new->n_elements = 0;
     return new;
 }
 
@@ -30,25 +31,16 @@ bitset_t *bitset_new_from(size_t universe_length, bitset_t *src) {
         return NULL;
     memcpy(new->nodes, src->nodes, BLOCK_SIZE * src->n_blocks);
     new->weight_sum = src->weight_sum;
+    new->n_elements = src->n_elements;
     return new;
 }
 
-int bitset_insert(bitset_t *set, node_t *node, unsigned int limit) {
-    if (set->weight_sum >= limit)
-        return MAX_LIMIT_REACHED;
-
+void bitset_insert(bitset_t *set, node_t *node) {
     size_t index = node->id / BLOCK_SIZE;
     size_t offset = node->id % BLOCK_SIZE;
     set->nodes[index] |= (1ULL << offset);
     set->weight_sum += node->weight;
-
-    if (node->has_mult_outs) {
-        if (set->weight_sum >= limit)
-            return MAX_LIMIT_REACHED;
-        if (set->weight_sum != node->weight)
-            return NON_PRIMITIVE_SET;
-    }
-    return 0;
+    set->n_elements++;
 }
 
 bool bitsets_are_disjoint(bitset_t *s1, bitset_t *s2) {
@@ -68,7 +60,7 @@ void bitset_free(bitset_t **set) {
     *set = NULL;
 }
 
-void bitsets_disjoint_union(bitset_t *dest, bitset_t *src) {
+void bitsets_union(bitset_t *dest, bitset_t *src) {
     for (size_t i = 0; i < dest->n_blocks; i++) {
         dest->nodes[i] |= src->nodes[i];
     }
