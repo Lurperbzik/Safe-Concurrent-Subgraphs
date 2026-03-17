@@ -2,15 +2,26 @@
 #include <stddef.h>
 #include <stdio.h>
 
-void print_path(node_t *base, node_t *node, bool init) {
+void print_input_path(node_t *base, node_t *node, bool init) {
     if (node == base && !init) {
         printf("\n");
         return;
     }
 
-    for (int i = 0; i < node->in_degree; i++) {
+    for (size_t i = 0; i < node->in_degree; i++) {
         printf("%d\t", node->id);
-        print_path(base, node->inputs[i], false);
+        print_input_path(base, node->inputs[i], false);
+    }
+}
+void print_output_path(node_t *base, node_t *node, bool init) {
+    if (node == base && !init) {
+        printf("\n");
+        return;
+    }
+
+    for (size_t i = 0; i < node->out_degree; i++) {
+        printf("%d\t", node->id);
+        print_output_path(base, node->outputs[i], false);
     }
 }
 
@@ -46,12 +57,14 @@ int main(void) {
         printf("\t{");
         printf("\tid: %d", graph.nodes[i].id);
         printf("\tweight: %d", graph.nodes[i].weight);
-        printf("\tin_degree: %d", graph.nodes[i].in_degree);
-        printf("\thas_mult_outs: %d", graph.nodes[i].has_mult_outs);
+        printf("\tin_degree: %ld", graph.nodes[i].in_degree);
+        printf("\tout_degree: %ld", graph.nodes[i].out_degree);
         printf("\t}");
     }
-    printf("\n\nPATH node_t A: \n");
     node_t *a = graph.nodes;
-    print_path(graph.nodes, a, true);
+    printf("\n\nPATH inputs A: \n");
+    print_input_path(graph.nodes, a, true);
+    printf("\n\nPATH outputs A: \n");
+    print_output_path(graph.nodes, a, true);
     return 0;
 }

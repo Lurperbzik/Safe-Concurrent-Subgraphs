@@ -13,15 +13,17 @@ typedef struct {
 typedef struct node_t {
     unsigned int id;
     unsigned int weight;
-    int in_degree;
+    size_t in_degree;
+    size_t out_degree;
     struct node_t **inputs;
-    bool has_mult_outs;
+    struct node_t **outputs;
 } node_t;
 
 typedef struct {
     node_t *nodes;
+    struct node_t **edges_in;
+    struct node_t **edges_out;
     size_t size;
 } graph_t;
-
 graph_t create_from_adj_matrix(adj_matrix_t *matrix);
 #endif

@@ -1,7 +1,6 @@
 #include "bitset.h"
 #include <stdlib.h>
 #include <string.h>
-
 #define BLOCK_SIZE 64
 
 bitset_t *bitset_new(size_t universe_length) {
@@ -36,29 +35,12 @@ bitset_t *bitset_new_from(size_t universe_length, bitset_t *src) {
     return new;
 }
 
-int bitset_insert(bitset_t *set, node_t *node, unsigned int limit) {
-    if (set->weight_sum >= limit)
-        return MAX_LIMIT_REACHED;
-
-    size_t index = node->id / BLOCK_SIZE;
-    size_t offset = node->id % BLOCK_SIZE;
-    set->nodes[index] |= (1ULL << offset);
-    set->weight_sum += node->weight;
-    set->n_elements++;
-
-    if (node->has_mult_outs) {
-        if (set->weight_sum >= limit)
-            return MAX_LIMIT_REACHED;
-        if (set->weight_sum != node->weight)
-            return NON_PRIMITIVE_SET;
-    }
-    return 0;
-}
-
-void bitset_insert_2(bitset_t *set, size_t id) {
+void bitset_insert(bitset_t *set, size_t id, unsigned int weight) {
     size_t index = id / BLOCK_SIZE;
     size_t offset = id % BLOCK_SIZE;
+
     set->nodes[index] |= (1ULL << offset);
+    set->weight_sum += weight;
     set->n_elements++;
 }
 
