@@ -179,8 +179,8 @@ void graph_reconstruct(bitset_t *final_union, bitset_vec_t **selected,
             /*
              * New entry of set if the entry set is not exit also
              */
-            if (join_entry(pos, *selected, matrix))
-                goto next_i;
+            // if (join_entry(pos, *selected, matrix))
+            //     goto next_i;
             /*
              * New exit of set if the exit set is not entry also - TODO: Si es
              * entrada pero entrada + nuevo > L sirve (Vector de pesos!)
@@ -225,6 +225,7 @@ bool join_entry(size_t index, bitset_vec_t *selected, adj_matrix_t *matrix) {
             }
             // join
             bitset_insert_2(selected->bitsets[bset_index], index);
+            fprintf(stdout, "Joined entry : %ld\n", index);
             return true;
         }
     next_i:;
@@ -256,6 +257,7 @@ bool join_exit(size_t index, bitset_vec_t *selected, adj_matrix_t *matrix) {
             }
             // join
             bitset_insert_2(selected->bitsets[bset_index], index);
+            fprintf(stdout, "Joined exit : %ld\n", index);
             return true;
         }
     next_i:;
@@ -282,7 +284,6 @@ void join_both(size_t index, bitset_vec_t **selected, adj_matrix_t *matrix) {
                 continue;
             } else {
                 index_next = (size_t)status_next;
-                fprintf(stdout, "mensaje de debug\n");
                 break;
             }
         }
@@ -306,8 +307,6 @@ void join_both(size_t index, bitset_vec_t **selected, adj_matrix_t *matrix) {
      */
     if (status_next == -1 || status_prev == -1) {
         fprintf(stdout, "Next: %d | Prev: %d\n", status_next, status_prev);
-    } else {
-        fprintf(stdout, "Next: %d | Prev: %d\n", status_next, status_prev);
     }
     bitsets_union((*selected)->bitsets[index_next],
                   (*selected)->bitsets[index_prev]);
@@ -317,6 +316,7 @@ void join_both(size_t index, bitset_vec_t **selected, adj_matrix_t *matrix) {
             bitset_vec_push(new, (*selected)->bitsets[i]);
         }
     }
+    fprintf(stdout, "Merged by :%ld\n", index);
     bitset_vec_free(selected);
     bitset_vec_copy(selected, new);
 }
