@@ -12,7 +12,7 @@ int deep_search_paths(bitset_t *bset, node_t *node, bitset_vec_t *vect,
                       size_t universe_length);
 bitset_vec_t *max_disjoint_sets(bitset_vec_t *vect, size_t universe_length);
 void backtrack(bitset_vec_t *vect, size_t index, bitset_t *current_union,
-               bitset_vec_t *selected, bitset_vec_t *best,
+               bitset_vec_t *selected, bitset_vec_t **best,
                size_t universe_length, size_t total_sets);
 
 void print_binary(uint64_t n) {
@@ -118,21 +118,21 @@ bitset_vec_t *max_disjoint_sets(bitset_vec_t *vect, size_t universe_length) {
     bitset_t *current_union = bitset_new(universe_length);
     bitset_vec_t *selected = bitset_vec_new();
     bitset_vec_t *best = bitset_vec_new();
-    backtrack(vect, index, current_union, selected, best, universe_length, 0);
+    backtrack(vect, index, current_union, selected, &best, universe_length, 0);
     return best;
 }
 
 void backtrack(bitset_vec_t *vect, size_t index, bitset_t *current_union,
-               bitset_vec_t *selected, bitset_vec_t *best,
+               bitset_vec_t *selected, bitset_vec_t **best,
                size_t universe_length, size_t total_sets) {
 
-    if (selected->size + vect->size - index <= best->size)
+    if (selected->size + vect->size - index <= (*best)->size)
         return;
 
     if (index >= vect->size) {
-        if (selected->size > best->size && total_sets == universe_length) {
-            bitset_vec_free(&best);
-            bitset_vec_copy(&best, selected);
+        if (selected->size > (*best)->size && total_sets == universe_length) {
+            bitset_vec_free(best);
+            bitset_vec_copy(best, selected);
         }
         return;
     }
