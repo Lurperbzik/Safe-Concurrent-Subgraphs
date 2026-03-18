@@ -27,7 +27,7 @@ int main(void) {
     };
     // clang-format on
     int nodes_weights[DIM] = {1, 1, 1, 1, 1, 3, 2, 3, 6, 2, 1, 4};
-    adj_matrix_t adj = {
+    inc_matrix_t adj = {
         .dim = DIM, .edges = edges, .nodes_weights = nodes_weights};
 
     graph_t graph = create_from_adj_matrix(&adj);

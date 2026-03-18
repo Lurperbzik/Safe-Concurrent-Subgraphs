@@ -5,24 +5,24 @@
 #define MAX_LIMIT_REACHED 0
 #define NON_PRIMITIVE_SET 0
 
-bitset_vec_t *max_disjoint_sets(bitset_vec_t *vect, adj_matrix_t *matrix);
+bitset_vec_t *max_disjoint_sets(bitset_vec_t *vect, inc_matrix_t *matrix);
 static bitset_vec_t *exhaustive_search_sets(graph_t *graph, unsigned int limit);
 static int deep_search_paths(bitset_t *bset, node_t *node, bitset_vec_t *vect,
                              size_t universe_length, unsigned int limit);
 static void backtrack(bitset_vec_t *vect, size_t index, bitset_t *current_union,
                       bitset_vec_t **selected, bitset_vec_t **best,
-                      adj_matrix_t *matrix, graph_t *graph, unsigned int limit);
+                      inc_matrix_t *matrix, graph_t *graph, unsigned int limit);
 static void graph_reconstruct(bitset_t *final_union, bitset_vec_t **selected,
-                              bitset_vec_t **best, adj_matrix_t *matrix,
+                              bitset_vec_t **best, inc_matrix_t *matrix,
                               graph_t *graph, unsigned int limit);
 static bool join_entry(size_t index, bitset_vec_t *selected, graph_t *graph,
                        unsigned int limit);
 static bool join_exit(size_t index, bitset_vec_t *selected, graph_t *graph,
                       unsigned int limit);
 static void join_both(size_t index, bitset_vec_t **selected,
-                      adj_matrix_t *matrix);
+                      inc_matrix_t *matrix);
 
-bitset_vec_t *safe_concurrent_subgraphs(graph_t *graph, adj_matrix_t *matrix,
+bitset_vec_t *safe_concurrent_subgraphs(graph_t *graph, inc_matrix_t *matrix,
                                         unsigned int limit) {
     // Get all primitive sets
     bitset_vec_t *vect = exhaustive_search_sets(graph, limit);
@@ -59,27 +59,28 @@ static bitset_vec_t *exhaustive_search_sets(graph_t *graph,
 
 static int deep_search_paths(bitset_t *bset, node_t *node, bitset_vec_t *vect,
                              size_t universe_length, unsigned int limit) {
-    bitset_t *new;
     if (bset->weight_sum >= limit)
         return MAX_LIMIT_REACHED;
     bitset_insert(bset, node->id, node->weight);
-
     if (node->out_degree > 1) {
-        if (bset->weight_sum >= limit)
+        if (bset->weight_sum >= limit) {
             return MAX_LIMIT_REACHED;
+        }
         if (bset->weight_sum != node->weight) {
-            new = bitset_vec_pop(vect);
-            bitset_free(&new);
+            bitset_t *current = bitset_vec_pop(vect);
+            bitset_free(&current);
             return NON_PRIMITIVE_SET;
         }
     }
+    // For some cases it's necessary this copy
+    bitset_t *bcopy = bitset_new_from(universe_length, bset);
 
     if (deep_search_paths(bset, node->inputs[0], vect, universe_length,
                           limit) != 0)
         return -1;
 
     for (size_t i = 1; i < node->in_degree; i++) {
-        new = bitset_new_from(universe_length, bset);
+        bitset_t *new = bitset_new_from(universe_length, bcopy);
         if (new == NULL)
             return -1;
         if (bitset_vec_push(vect, new) != 0)
@@ -89,12 +90,13 @@ static int deep_search_paths(bitset_t *bset, node_t *node, bitset_vec_t *vect,
                               limit) != 0)
             return -1;
     }
+    bitset_free(&bcopy);
     return 0;
 }
 
 static void backtrack(bitset_vec_t *vect, size_t index, bitset_t *current_union,
                       bitset_vec_t **selected, bitset_vec_t **best,
-                      adj_matrix_t *matrix, graph_t *graph,
+                      inc_matrix_t *matrix, graph_t *graph,
                       unsigned int limit) {
 
     if ((*selected)->size + vect->size - index <= (*best)->size)
@@ -129,7 +131,7 @@ static void backtrack(bitset_vec_t *vect, size_t index, bitset_t *current_union,
 }
 
 static void graph_reconstruct(bitset_t *final_union, bitset_vec_t **selected,
-                              bitset_vec_t **best, adj_matrix_t *matrix,
+                              bitset_vec_t **best, inc_matrix_t *matrix,
                               graph_t *graph, unsigned int limit) {
 
     if (final_union->n_elements == matrix->dim) {
@@ -249,7 +251,7 @@ static bool join_entry(size_t index, bitset_vec_t *selected, graph_t *graph,
 }
 
 static void join_both(size_t index, bitset_vec_t **selected,
-                      adj_matrix_t *matrix) {
+                      inc_matrix_t *matrix) {
     /*
      *  join(element, previous[0], next[0])
      */

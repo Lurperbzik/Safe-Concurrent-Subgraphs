@@ -12,7 +12,7 @@
  * una lista adyacente en memoria
  */
 
-graph_t create_from_adj_matrix(adj_matrix_t *matrix) {
+graph_t create_from_adj_matrix(inc_matrix_t *matrix) {
     graph_t graph = {0};
 
     size_t *in_degree = calloc(matrix->dim, sizeof(size_t));

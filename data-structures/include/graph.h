@@ -8,7 +8,7 @@ typedef struct {
     unsigned int dim;
     int *nodes_weights;
     bool *edges;
-} adj_matrix_t;
+} inc_matrix_t;
 
 typedef struct node_t {
     unsigned int id;
@@ -25,5 +25,5 @@ typedef struct {
     struct node_t **edges_out;
     size_t size;
 } graph_t;
-graph_t create_from_adj_matrix(adj_matrix_t *matrix);
+graph_t create_from_adj_matrix(inc_matrix_t *matrix);
 #endif
